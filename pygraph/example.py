@@ -2,7 +2,7 @@ import queue
 import numpy as np
 import collections
 import pygraph as pg
-
+from collections import Counter
 import datetime
 
 def memoryview_to_np(memview, nebr_dt):
@@ -12,25 +12,25 @@ def memoryview_to_np(memview, nebr_dt):
     return a;
 
 #simple plain CSR 
-def test_csr():    
+def test_csr():
     outdir = ""
-    num_sources = 1 
-    num_threads = 2 
+    num_sources = 1
+    num_threads = 2
     graph  = pg.init(1,1, outdir, num_sources, num_threads) # Indicate one pgraph, and one vertex type
-    
+
     tid0 = graph.init_vertex_type(1000, True, "gtype"); # initiate the vertex type
     edge_dt = np.dtype([('src', np.int32), ('dst', np.int32)])
     flags = pg.enumGraph.eUdir;
     pgraph = graph.create_schema(flags, tid0, "friend", edge_dt); #initiate the pgraph
-    
+
     ifile = "smallworld.txt";
-    dd = np.zeros(1024, edge_dt); 
+    dd = np.zeros(1024, edge_dt);
     edge_count = 0;
     with open(ifile) as f:
         for line in f: # read rest of lines
             x = line.split();
             #print(x);
-            if x[0] != "#": 
+            if x[0] != "#":
                 dd[edge_count] = (x[0], x[1]);
                 edge_count += 1;
                 if (edge_count == 1024):
@@ -40,7 +40,7 @@ def test_csr():
     #print(edge_count);
     pgraph.add_edges(dd, edge_count); # You can call this API many times, if needed
     pgraph.wait(); # required for the time-being. You cannot add edges after this API.
-   
+
 
     offset_csr1, offset_csc1, nebrs_csr1, nebrs_csc1 = pg.create_csr_view(pgraph);
     offset_dt = np.dtype([('offset', np.int32)])
@@ -51,12 +51,49 @@ def test_csr():
     nebrs_csr  = memoryview_to_np(nebrs_csr1, csr_dt);
     nebrs_csc  = memoryview_to_np(nebrs_csc1, csr_dt);
 
-    print(offset_csr.tolist());
-    print(nebrs_csr.tolist());
+   # print("offset_csr");       
+   # print(offset_csr.tolist());
+   # print("nebrs_csr");
+   #  print(nebrs_csr.tolist());
+   #  print("the graph");
 
+
+
+    BFS(0, offset_csr, nebrs_csr);
+
+def BFS(root, offset_csr, nebrs_csr):
+        visited = [];
+
+        queue = [];
+        level = [None]*1000;
+        level[root] = 0;
+        queue.append(root);
+
+        visited.append(root);
+
+        while queue:
+
+                root = queue.pop(0);
+
+                start = offset_csr[root][0];
+                end = offset_csr[root+1][0];
+                #print("start" + str(start)+ " end" +str(end))
+                for i in range(start,end):
+                        #print(" value or i" + str(i))
+
+                        if nebrs_csr[i][0] not in visited:
+                                levIndex = nebrs_csr[i][0];
+                                level[levIndex] = level[root] + 1;
+                                queue.append(nebrs_csr[i][0]);
+                                visited.append(nebrs_csr[i][0]);
+
+
+        for key, value in Counter(level).items():
+                print("Level " + str(key) +" : " +str(value) + " Vertices");
+                                        
 def test_lanl_graph_python():
-    
-    edge_dt = np.dtype([('src', np.int32), ('dst', np.int32), 
+
+    edge_dt = np.dtype([('src', np.int32), ('dst', np.int32),
                        ('time', np.int32),
                        ('duration', np.int32),
                        ('protocol', np.int32),
@@ -67,7 +104,7 @@ def test_lanl_graph_python():
                        ('src_Bytes', np.int32),
                        ('dst_Bytes', np.int32)
                       ])
-    nebr_dt = np.dtype([('dst', np.int32), 
+    nebr_dt = np.dtype([('dst', np.int32),
                        ('time', np.int32),
                        ('duration', np.int32),
                        ('protocol', np.int32),
@@ -78,16 +115,16 @@ def test_lanl_graph_python():
                        ('src_Bytes', np.int32),
                        ('dst_Bytes', np.int32)
     ])
-    
+
     flags = pg.enumGraph.eUdir;
     outdir = ""
     graph  = pg.init(1,1, outdir, 1, 4) # Indicate one pgraph, and one vertex type
     tid0 = graph.init_vertex_type(31142, False, "gtype"); # initiate the vertex type
     pgraph = graph.create_schema(flags, tid0, "friend", edge_dt); #initiate the pgraph
-   
+
     ifile = "/home/datalab/data/lanl17/nf_day-02.csv"; # test.csv;
-    
-    dd = np.zeros(10000, edge_dt); 
+
+    dd = np.zeros(10000, edge_dt);
     edge_count = 0;
     start = datetime.datetime.now()
     with open(ifile) as f:
@@ -104,12 +141,12 @@ def test_lanl_graph_python():
                 pgraph.add_edges(dd, edge_count);
                 edge_count = 0
     pgraph.add_edges(dd, edge_count);
-    
+
     pgraph.wait(); # You can't call add_edges() after wait(). The need of it will be removed in future.
     end = datetime.datetime.now()
     diff = end - start;
     print("graph creation time = ", diff)
-    
+
 
 if __name__=="__main__":
     test_csr();
