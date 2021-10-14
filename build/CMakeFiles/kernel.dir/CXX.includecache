@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/dkhack/Desktop/cs636/kernel/bfs.cpp
+cassert
+-
+iostream
+-
+csr.h
+/home/dkhack/Desktop/cs636/kernel/csr.h
+queue
+-
+omp.h
+/home/dkhack/Desktop/cs636/kernel/omp.h
+chrono
+-
+
+/home/dkhack/Desktop/cs636/kernel/csr.h
+stdint.h
+/home/dkhack/Desktop/cs636/kernel/stdint.h
+
