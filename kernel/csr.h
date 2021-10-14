@@ -1,6 +1,5 @@
-#pragma once
-
 #include "stdint.h"
+#pragma once
 using namespace std;
 
 typedef uint32_t vid_t;
@@ -20,7 +19,8 @@ class csr_t {
 
  public:
     csr_t() {
-        //TODO initialize the members to a default value
+        //TODO initialize the members to a default value  
+        
     };
     void init(vid_t a_vcount, vid_t a_dstsize, void* a_offset, void* a_nebrs, int64_t a_flag, vid_t edge_count) {
         v_count = a_vcount;
@@ -38,8 +38,17 @@ class csr_t {
         return e_count;
     }
     vid_t get_degree(vid_t index) {
-        return offset[index + 1] - offset[index];
+        return offset[(int)index + 1] - offset[(int)index];
     }
+    
+    vid_t* get_nbrs(){
+    	return nebrs;
+    }
+    
+    vid_t* get_offset() {
+    	return offset;
+    }
+    
 };
 
 class edge_t {
@@ -75,6 +84,7 @@ class graph_t {
     coo_t coo;
  public:
     void init(vid_t a_vcount, vid_t a_dstsize, void* a_offset, void* a_nebrs, void* a_offset1, void* a_nebrs1, int64_t flag, int64_t num_vcount) {
+    csr.init(a_vcount, a_dstsize, a_offset, a_nebrs, flag, num_vcount);
     }
 
     vid_t get_vcount() {
@@ -84,4 +94,5 @@ class graph_t {
         return csr.e_count;
     }
 };
+
 

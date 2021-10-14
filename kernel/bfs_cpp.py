@@ -58,11 +58,17 @@ def test_csr():
     flag = 0;
     G = kernel.init_graph(offset_csr, nebrs_csr, offset_csc, nebrs_csc, flag, v_count);
 
-    print(G.get_vcount())
+    print("printing v-count " + str(G.get_vcount()))
 
     root = 0;
+    print("calling parallel bfs");
+    G.parallelBfs(1);	
+    
     G.run_bfs(0);
-
+    
+  
+    
+	
 def test_lanl_graph_python():
     
     edge_dt = np.dtype([('src', np.int32), ('dst', np.int32), 

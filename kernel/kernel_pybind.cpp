@@ -13,6 +13,8 @@ using std::endl;
 //#include "generated_pybind.h"
 
 void run_bfs(graph_t& graph, vid_t root);
+void parallelBfs(graph_t& graph, vid_t root);
+
 
 PYBIND11_MODULE(kernel, m) {
 
@@ -25,6 +27,11 @@ PYBIND11_MODULE(kernel, m) {
     .def("run_bfs",
         [](graph_t& graph, vid_t root) {
             run_bfs(graph, root);
+        }
+    )
+    .def("parallelBfs",
+       [](graph_t& graph, vid_t root) {
+            parallelBfs(graph, root);
         }
     )
     ;
